@@ -4,6 +4,13 @@
 
 This FastAPI application provides endpoints to fetch paginated lists of companies and their employees. The data is generated using a fake data generator and stored in memory. You can filter the data by various criteria and retrieve it in paginated format. API key authentication is required to access the endpoints.
 
+### How to Start the API
+spin up the api with docker compose
+
+```
+docker-compose up -d
+```
+
 ### API Endpoints
 
 1. **Get Companies**: `/companies`
