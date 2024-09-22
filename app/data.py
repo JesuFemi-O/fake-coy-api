@@ -22,6 +22,9 @@ def create_fake_employee(employee_id: int) -> Employee:
 def create_fake_company(company_id: int, num_employees: int) -> Company:
     created_at = fake.date_time_this_year()
     employees = [create_fake_employee(i) for i in range(1, num_employees + 1)]
+    
+    # Generate a random valuation between 10 million and 1 billion
+    valuation = round(rd.uniform(10_000_000, 1_000_000_000), 2)
     return Company(
         id=company_id,
         name=fake.company(),
@@ -29,7 +32,8 @@ def create_fake_company(company_id: int, num_employees: int) -> Company:
         created_at=created_at,
         updated_at=created_at,
         employees=employees,
+        valuation=valuation,
     )
 
-def get_fake_companies(num_companies: int = 10000) -> list:
+def get_fake_companies(num_companies: int = 300) -> list:
     return [create_fake_company(i, fake.random_int(min=5, max=20)) for i in range(1, num_companies + 1)]

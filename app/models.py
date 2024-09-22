@@ -18,6 +18,7 @@ class Company(BaseModel):
     created_at: datetime
     updated_at: datetime
     employees: List[Employee]
+    valuation: float
 
 class CompanyWithoutEmployees(BaseModel):
     id: int
@@ -25,6 +26,7 @@ class CompanyWithoutEmployees(BaseModel):
     industry: str
     created_at: datetime
     updated_at: datetime
+    valuation: float
 
 
 class PaginatedResponse(BaseModel):
