@@ -2,12 +2,12 @@
 
 ## Overview
 
-This FastAPI application provides endpoints to fetch paginated lists of companies and their employees. The data is generated using a fake data generator and stored in memory. You can filter the data by various criteria and retrieve it in paginated format. API key authentication is required to access the endpoints.
+This FastAPI application provides endpoints to fetch paginated lists of companies and their employees. The data is generated using a fake data generator and stored in memory. You can filter the data by various criteria and retrieve it in a paginated format. API key authentication is required to access the endpoints.
 
 ### How to Start the API
-spin up the api with docker compose
+Spin up the API using Docker Compose:
 
-```
+```bash
 docker-compose up -d
 ```
 
@@ -15,6 +15,7 @@ docker-compose up -d
 
 1. **Get Companies**: `/companies`
 2. **Get Employees by Company ID**: `/companies/{company_id}/employees`
+3. **Update Company Valuation**: `/companies/update-valuation`
 
 ### Authentication
 
@@ -44,8 +45,8 @@ The API is hosted at `http://localhost:8000/`.
 - `page` (int): Page number (default: 1)
 - `size` (int): Number of items per page (default: 10, max: 100)
 - `industry` (str, optional): Filter by industry
-- `created_after` (datetime, optional): Filter companies created after this date
-- `updated_after` (datetime, optional): Filter companies updated after this date
+- `start_dt` (datetime, optional): Filter companies updated after this date
+- `end_dt` (datetime, optional): Filter companies updated before this date (requires `start_dt` to be provided)
 
 #### Response:
 
@@ -59,9 +60,9 @@ Returns a JSON object containing the paginated list of companies without employe
             "name": "Company A",
             "industry": "Tech",
             "created_at": "2023-08-20T00:00:00",
-            "updated_at": "2023-08-21T00:00:00"
-        },
-        ...
+            "updated_at": "2023-08-21T00:00:00",
+            "valuation": 100000000
+        }
     ],
     "total": 100,
     "page": 1,
@@ -81,7 +82,7 @@ API_KEY = "mysecretkey"
 response = requests.get(
     f"{BASE_URL}/companies",
     headers={"x-api-key": API_KEY},
-    params={"page": 1, "size": 10, "industry": "Tech"}
+    params={"page": 1, "size": 10, "industry": "Health"}
 )
 
 if response.status_code == 200:
@@ -106,8 +107,8 @@ else:
 - `page` (int): Page number (default: 1)
 - `size` (int): Number of items per page (default: 10, max: 100)
 - `job_title` (str, optional): Filter by job title
-- `created_after` (datetime, optional): Filter employees created after this date
-- `updated_after` (datetime, optional): Filter employees updated after this date
+- `start_dt` (datetime, optional): Filter employees updated after this date
+- `end_dt` (datetime, optional): Filter employees updated before this date (requires `start_dt` to be provided)
 
 #### Response:
 
@@ -124,8 +125,7 @@ Returns a JSON object containing the paginated list of employees.
             "email": "john.doe@example.com",
             "created_at": "2023-08-20T00:00:00",
             "updated_at": "2023-08-21T00:00:00"
-        },
-        ...
+        }
     ],
     "total": 50,
     "page": 1,
@@ -148,6 +148,49 @@ response = requests.get(
     f"{BASE_URL}/companies/{company_id}/employees",
     headers={"x-api-key": API_KEY},
     params={"page": 1, "size": 10, "job_title": "Engineer"}
+)
+
+if response.status_code == 200:
+    print(response.json())
+else:
+    print("Failed:", response.status_code, response.text)
+```
+
+### 3. Update Company Valuation
+
+- **Endpoint:** `/companies/update-valuation`
+- **Method:** `GET`
+- **Authentication:** API key required (`x-api-key`)
+- **Description:** Randomly selects up to 10 companies and updates their valuations.
+
+#### Response:
+
+Returns a JSON list of companies with updated valuations.
+
+```json
+[
+    {
+        "id": 1,
+        "name": "Company A"
+    },
+    {
+        "id": 5,
+        "name": "Company B"
+    }
+]
+```
+
+#### Example Request with Python `requests`:
+
+```python
+import requests
+
+BASE_URL = "http://localhost:8000"
+API_KEY = "mysecretkey"
+
+response = requests.get(
+    f"{BASE_URL}/companies/update-valuation",
+    headers={"x-api-key": API_KEY}
 )
 
 if response.status_code == 200:
@@ -180,7 +223,7 @@ client = RESTClient(
 for company_batch in client.paginate("/companies", params={"size": 10, "industry": "Health"}):
     for company in company_batch:
         print(company)
-    break # to prevent printing out 10k records
+    break # to prevent printing out too many records
 ```
 
 ### 2. Fetch Employees by Company ID with `dlt.RESTClient`
@@ -194,7 +237,7 @@ for employee_batch in client.paginate(f"/companies/{company_id}/employees"):
     break
 ```
 
-### Conclusion
+## Conclusion
 
 This API allows you to fetch paginated lists of companies and their employees with optional filtering by various criteria. The API requires an API key for authentication. You can interact with the API using Python's `requests` library or `dlt`'s `RESTClient` for more advanced use cases.
 
